@@ -33,6 +33,29 @@ fn solve_part_one() -> usize {
     password
 }
 
+fn left_logic(num: &mut isize, amount: isize) -> usize {
+    let mut password = 0;
+
+    if amount >= *num {
+        password += 1 + ((*num - amount) / 100).abs() as usize;
+    };
+    *num = (*num - amount).rem_euclid(100);
+
+    password
+}
+
+fn right_logic(num: &mut isize, amount: isize) -> usize {
+    let mut password = 0;
+
+    if *num + amount >= 100 {
+        password += ((*num + amount) / 100).abs() as usize;
+    };
+
+    *num = (*num + amount).rem_euclid(100);
+
+    password
+}
+
 fn solve_part_two() -> usize {
     let mut num = 50;
     let mut password = 0;
@@ -48,16 +71,10 @@ fn solve_part_two() -> usize {
     for (direction, amount) in instructions {
         match direction {
             "L" => {
-                if amount >= num {
-                    password += 1 + ((num - amount) / 100).abs() as usize;
-                }
-                num = (num - amount).rem_euclid(100);
+                password += left_logic(&mut num, amount);
             }
             "R" => {
-                if num + amount >= 100 {
-                    password += ((num + amount) / 100) as usize;
-                }
-                num = (num + amount).rem_euclid(100);
+                password += right_logic(&mut num, amount);
             }
             _ => {
                 unreachable!("file only contains L or R for the direction");
@@ -74,28 +91,7 @@ pub fn solve() {
 
 #[cfg(test)]
 mod test {
-    fn left_logic(num: &mut isize, amount: isize) -> usize {
-        let mut password = 0;
-
-        if amount >= *num {
-            password += 1 + ((*num - amount) / 100).abs() as usize;
-        };
-        *num = (*num - amount).rem_euclid(100);
-
-        password
-    }
-
-    fn right_logic(num: &mut isize, amount: isize) -> usize {
-        let mut password = 0;
-
-        if *num + amount >= 100 {
-            password += ((*num + amount) / 100).abs() as usize;
-        };
-
-        *num = (*num + amount).rem_euclid(100);
-
-        password
-    }
+    use super::*;
 
     #[test]
     fn test_left() {
