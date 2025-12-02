@@ -36,29 +36,25 @@ fn solve_part_one() -> usize {
 fn move_left(num: &mut isize, amount: isize) -> usize {
     let distance_to_next_zero = if *num == 0 { 100 } else { *num };
 
-    let passes = if amount < distance_to_next_zero {
-        0
-    } else {
-        1 + ((amount - distance_to_next_zero) / 100) as usize
-    };
-
     *num = (*num - amount).rem_euclid(100);
 
-    passes
+    if amount < distance_to_next_zero {
+        return 0;
+    }
+
+    1 + ((amount - distance_to_next_zero) / 100) as usize
 }
 
 fn move_right(num: &mut isize, amount: isize) -> usize {
     let distance_to_next_zero = if *num == 0 { 100 } else { 100 - *num };
 
-    let passes = if amount < distance_to_next_zero {
-        0
-    } else {
-        1 + ((amount - distance_to_next_zero) / 100) as usize
-    };
-
     *num = (*num + amount).rem_euclid(100);
 
-    passes
+    if amount < distance_to_next_zero {
+        return 0;
+    };
+
+    1 + ((amount - distance_to_next_zero) / 100) as usize
 }
 
 fn solve_part_two() -> usize {
