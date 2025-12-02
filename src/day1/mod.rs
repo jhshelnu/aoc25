@@ -33,27 +33,32 @@ fn solve_part_one() -> usize {
     password
 }
 
-fn left_logic(num: &mut isize, amount: isize) -> usize {
-    let mut password = 0;
+fn move_left(num: &mut isize, amount: isize) -> usize {
+    let distance_to_next_zero = if *num == 0 { 100 } else { *num };
 
-    if amount >= *num {
-        password += 1 + ((*num - amount) / 100).abs() as usize;
+    let passes = if amount < distance_to_next_zero {
+        0
+    } else {
+        1 + ((amount - distance_to_next_zero) / 100) as usize
     };
+
     *num = (*num - amount).rem_euclid(100);
 
-    password
+    passes
 }
 
-fn right_logic(num: &mut isize, amount: isize) -> usize {
-    let mut password = 0;
+fn move_right(num: &mut isize, amount: isize) -> usize {
+    let distance_to_next_zero = if *num == 0 { 100 } else { 100 - *num };
 
-    if *num + amount >= 100 {
-        password += ((*num + amount) / 100).abs() as usize;
+    let passes = if amount < distance_to_next_zero {
+        0
+    } else {
+        1 + ((amount - distance_to_next_zero) / 100) as usize
     };
 
     *num = (*num + amount).rem_euclid(100);
 
-    password
+    passes
 }
 
 fn solve_part_two() -> usize {
@@ -71,10 +76,10 @@ fn solve_part_two() -> usize {
     for (direction, amount) in instructions {
         match direction {
             "L" => {
-                password += left_logic(&mut num, amount);
+                password += move_left(&mut num, amount);
             }
             "R" => {
-                password += right_logic(&mut num, amount);
+                password += move_right(&mut num, amount);
             }
             _ => {
                 unreachable!("file only contains L or R for the direction");
@@ -94,10 +99,19 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_left_no_movement() {
+        let mut num: isize = 50;
+        let amount: isize = 0;
+        let password = move_left(&mut num, amount);
+        assert_eq!(num, 50);
+        assert_eq!(password, 0);
+    }
+
+    #[test]
     fn test_left() {
         let mut num: isize = 50;
         let amount: isize = 10;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 40);
         assert_eq!(password, 0);
     }
@@ -106,7 +120,7 @@ mod test {
     fn test_left_to_zero() {
         let mut num: isize = 50;
         let amount: isize = 50;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 0);
         assert_eq!(password, 1);
     }
@@ -115,7 +129,7 @@ mod test {
     fn test_wraps_left() {
         let mut num: isize = 50;
         let amount: isize = 70;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 80);
         assert_eq!(password, 1);
     }
@@ -124,7 +138,7 @@ mod test {
     fn test_wraps_left_to_original_num() {
         let mut num: isize = 50;
         let amount: isize = 100;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 50);
         assert_eq!(password, 1);
     }
@@ -133,7 +147,7 @@ mod test {
     fn test_wraps_left_to_less_than_original_num() {
         let mut num: isize = 50;
         let amount: isize = 120;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 30);
         assert_eq!(password, 1);
     }
@@ -142,7 +156,7 @@ mod test {
     fn test_wraps_left_twice() {
         let mut num: isize = 50;
         let amount: isize = 200;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 50);
         assert_eq!(password, 2);
     }
@@ -151,16 +165,25 @@ mod test {
     fn test_wraps_left_lands_on_zero() {
         let mut num: isize = 50;
         let amount: isize = 150;
-        let password = left_logic(&mut num, amount);
+        let password = move_left(&mut num, amount);
         assert_eq!(num, 0);
         assert_eq!(password, 2);
+    }
+
+    #[test]
+    fn test_right_no_movement() {
+        let mut num: isize = 50;
+        let amount: isize = 0;
+        let password = move_right(&mut num, amount);
+        assert_eq!(num, 50);
+        assert_eq!(password, 0);
     }
 
     #[test]
     fn test_right() {
         let mut num: isize = 50;
         let amount: isize = 10;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 60);
         assert_eq!(password, 0);
     }
@@ -169,7 +192,7 @@ mod test {
     fn test_right_to_zero() {
         let mut num: isize = 50;
         let amount: isize = 50;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 0);
         assert_eq!(password, 1);
     }
@@ -178,7 +201,7 @@ mod test {
     fn test_wraps_right() {
         let mut num: isize = 50;
         let amount: isize = 70;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 20);
         assert_eq!(password, 1);
     }
@@ -187,7 +210,7 @@ mod test {
     fn test_wraps_right_to_original_num() {
         let mut num: isize = 50;
         let amount: isize = 100;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 50);
         assert_eq!(password, 1);
     }
@@ -196,7 +219,7 @@ mod test {
     fn test_wraps_right_to_more_than_original_num() {
         let mut num: isize = 50;
         let amount: isize = 120;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 70);
         assert_eq!(password, 1);
     }
@@ -205,7 +228,7 @@ mod test {
     fn test_wraps_right_twice() {
         let mut num: isize = 50;
         let amount: isize = 200;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 50);
         assert_eq!(password, 2);
     }
@@ -214,7 +237,7 @@ mod test {
     fn test_wraps_right_lands_on_zero() {
         let mut num: isize = 50;
         let amount: isize = 150;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 0);
         assert_eq!(password, 2);
     }
@@ -223,8 +246,63 @@ mod test {
     fn test_right_a_bunch() {
         let mut num: isize = 50;
         let amount: isize = (100 * 25) + 5;
-        let password = right_logic(&mut num, amount);
+        let password = move_right(&mut num, amount);
         assert_eq!(num, 55);
         assert_eq!(password, 25);
+    }
+
+    #[test]
+    fn left_starting_at_zero() {
+        let mut num: isize = 0;
+        let amount: isize = 5;
+        let password = move_left(&mut num, amount);
+        assert_eq!(num, 95);
+        assert_eq!(password, 0);
+    }
+
+    #[test]
+    fn test_sample_input() {
+        let mut num: isize = 50;
+        let mut password = 0;
+
+        password += move_left(&mut num, 68);
+        assert_eq!(num, 82);
+        assert_eq!(password, 1);
+
+        password += move_left(&mut num, 30);
+        assert_eq!(num, 52);
+        assert_eq!(password, 1);
+
+        password += move_right(&mut num, 48);
+        assert_eq!(num, 0);
+        assert_eq!(password, 2);
+
+        password += move_left(&mut num, 5);
+        assert_eq!(num, 95);
+        assert_eq!(password, 2);
+
+        password += move_right(&mut num, 60);
+        assert_eq!(num, 55);
+        assert_eq!(password, 3);
+
+        password += move_left(&mut num, 55);
+        assert_eq!(num, 0);
+        assert_eq!(password, 4);
+
+        password += move_left(&mut num, 1);
+        assert_eq!(num, 99);
+        assert_eq!(password, 4);
+
+        password += move_left(&mut num, 99);
+        assert_eq!(num, 0);
+        assert_eq!(password, 5);
+
+        password += move_right(&mut num, 14);
+        assert_eq!(num, 14);
+        assert_eq!(password, 5);
+
+        password += move_left(&mut num, 82);
+        assert_eq!(num, 32);
+        assert_eq!(password, 6);
     }
 }
