@@ -1,5 +1,3 @@
-use std::sync::LazyLock;
-
 use fancy_regex::Regex;
 use once_cell::sync::Lazy;
 
